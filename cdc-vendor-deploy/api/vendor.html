@@ -1,0 +1,2108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CDC Vendor Portal - Crep Dog Crew</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.23.9/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.5.0/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8f9fa;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .header {
+            background: #1a1a1a;
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .vendor-info {
+            font-size: 14px;
+            text-align: right;
+        }
+
+        .vendor-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .logout-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #ff5252;
+        }
+
+        /* Main Content */
+        .main {
+            min-height: 100vh;
+            padding: 40px 0;
+        }
+
+        /* Landing Page */
+        .landing {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: white;
+        }
+
+        .landing-content {
+            max-width: 600px;
+        }
+
+        .landing-logo {
+            font-size: 80px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, #fff 0%, #d0d0d0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .landing-title {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .landing-subtitle {
+            font-size: 18px;
+            color: #b0b0b0;
+            margin-bottom: 40px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #1a1a1a;
+        }
+
+        .btn-primary:hover {
+            background: #f0f0f0;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: #1a1a1a;
+            transform: translateY(-2px);
+        }
+
+        /* Forms */
+        .form-container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .form-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #1a1a1a;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #1a1a1a;
+            box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.1);
+        }
+
+        .form-back {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .form-back button {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: underline;
+            transition: color 0.3s;
+        }
+
+        .form-back button:hover {
+            color: #1a1a1a;
+        }
+
+        /* Dashboard */
+        .dashboard {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 18px 24px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            position: relative;
+        }
+
+        .tab:hover {
+            background: white;
+            color: #1a1a1a;
+        }
+
+        .tab.active {
+            background: white;
+            color: #1a1a1a;
+            border-bottom-color: #1a1a1a;
+        }
+
+        .tab-content {
+            padding: 40px;
+        }
+
+        /* Tables */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #e0e0e0;
+            color: #333;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Status Badges */
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-submitted {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .badge-approved {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-rejected {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .badge-shipped {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .badge-authenticated {
+            background: #f3e5f5;
+            color: #6a1b9a;
+        }
+
+        .badge-consigned {
+            background: #e0f2f1;
+            color: #00695c;
+        }
+
+        .badge-sold {
+            background: #fce4ec;
+            color: #ad1457;
+        }
+
+        /* Shoe Form */
+        .shoe-form {
+            background: #f8f9fa;
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .shoe-list {
+            margin-top: 30px;
+        }
+
+        .shoe-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .shoe-details {
+            flex: 1;
+        }
+
+        .shoe-model {
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .shoe-meta {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .shoe-value {
+            font-weight: 600;
+            color: #2e7d32;
+            margin-right: 20px;
+        }
+
+        .remove-btn {
+            background: #ffebee;
+            color: #c62828;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .remove-btn:hover {
+            background: #ffcdd2;
+        }
+
+        /* MRN Styles */
+        .mrn-container {
+            background: white;
+            border: 2px solid #1a1a1a;
+            padding: 40px;
+            margin-bottom: 30px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .mrn-header {
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .mrn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .mrn-section {
+            border: 1px solid #1a1a1a;
+            padding: 16px;
+        }
+
+        .mrn-label {
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .mrn-field {
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #1a1a1a;
+            min-height: 20px;
+        }
+
+        .warehouse-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .warehouse-option input {
+            margin-right: 8px;
+        }
+
+        .warehouse-name {
+            font-weight: 600;
+        }
+
+        .mrn-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .mrn-table th,
+        .mrn-table td {
+            border: 1px solid #1a1a1a;
+            padding: 8px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .mrn-table th {
+            background: #f0f0f0;
+            font-weight: 700;
+        }
+
+        .mrn-table td {
+            height: 24px;
+        }
+
+        .mrn-total {
+            font-weight: 700;
+            background: #f0f0f0;
+        }
+
+        .mrn-signature {
+            margin-top: 30px;
+            border-top: 1px solid #1a1a1a;
+            padding-top: 20px;
+        }
+
+        .signature-canvas {
+            border: 1px solid #1a1a1a;
+            display: block;
+            margin: 20px 0;
+            background: white;
+            cursor: crosshair;
+        }
+
+        .signature-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .toc-section {
+            margin-top: 40px;
+            page-break-before: always;
+        }
+
+        .toc-title {
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .toc-clause {
+            margin-bottom: 16px;
+        }
+
+        .toc-clause-number {
+            font-weight: 700;
+        }
+
+        .mrn-footer {
+            margin-top: 30px;
+            border-top: 1px solid #1a1a1a;
+            padding-top: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        /* Notifications */
+        .notifications-list {
+            max-width: 600px;
+        }
+
+        .notification-item {
+            background: white;
+            border-left: 4px solid #1a1a1a;
+            padding: 20px;
+            margin-bottom: 16px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .notification-title {
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .notification-message {
+            color: #666;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .notification-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        /* Upload Area */
+        .upload-area {
+            border: 2px dashed #1a1a1a;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 30px;
+        }
+
+        .upload-area:hover {
+            background: #f8f9fa;
+            border-color: #333;
+        }
+
+        .upload-area.active {
+            background: #f8f9fa;
+            border-color: #1a1a1a;
+        }
+
+        .upload-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .upload-text {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .upload-hint {
+            font-size: 13px;
+            color: #666;
+        }
+
+        /* Utility Classes */
+        .mt-20 {
+            margin-top: 20px;
+        }
+
+        .mb-20 {
+            margin-bottom: 20px;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-muted {
+            color: #666;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .landing-logo {
+                font-size: 48px;
+            }
+
+            .landing-title {
+                font-size: 32px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .form-container {
+                padding: 24px;
+            }
+
+            .tab-content {
+                padding: 20px;
+            }
+
+            .mrn-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 12px 8px;
+            }
+
+            .shoe-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .shoe-value {
+                margin-right: 0;
+                margin-top: 12px;
+            }
+
+            .mrn-footer {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        const { jsPDF } = window.jspdf;
+
+        // API Utility
+        const apiCall = async (method, endpoint, data = null) => {
+            try {
+                const options = {
+                    method,
+                    headers: { 'Content-Type': 'application/json' }
+                };
+                if (data) options.body = JSON.stringify(data);
+
+                const response = await fetch(endpoint, options);
+                if (response.ok) return await response.json();
+            } catch (error) {
+                console.log('API call failed, using localStorage fallback');
+            }
+            return null;
+        };
+
+        // Notification Manager
+        const NotificationManager = {
+            add: (message, type = 'info', title = 'Notification') => {
+                const notifications = JSON.parse(localStorage.getItem('cdc_synced_notifications') || '[]');
+                notifications.unshift({
+                    id: Date.now(),
+                    title,
+                    message,
+                    type,
+                    timestamp: new Date().toISOString()
+                });
+                localStorage.setItem('cdc_synced_notifications', JSON.stringify(notifications.slice(0, 50)));
+                window.dispatchEvent(new Event('storagechange'));
+            },
+
+            getAll: () => JSON.parse(localStorage.getItem('cdc_synced_notifications') || '[]'),
+
+            clear: () => {
+                localStorage.removeItem('cdc_synced_notifications');
+                window.dispatchEvent(new Event('storagechange'));
+            }
+        };
+
+        // Signature Canvas
+        function SignatureCanvas({ onSign, onClear }) {
+            const canvasRef = useRef(null);
+            const [isDrawing, setIsDrawing] = useState(false);
+
+            useEffect(() => {
+                const canvas = canvasRef.current;
+                canvas.width = canvas.offsetWidth;
+                canvas.height = 150;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+            }, []);
+
+            const startDrawing = (e) => {
+                setIsDrawing(true);
+                const { offsetX, offsetY } = e.nativeEvent;
+                const ctx = canvasRef.current.getContext('2d');
+                ctx.beginPath();
+                ctx.moveTo(offsetX, offsetY);
+            };
+
+            const draw = (e) => {
+                if (!isDrawing) return;
+                const { offsetX, offsetY } = e.nativeEvent;
+                const ctx = canvasRef.current.getContext('2d');
+                ctx.lineTo(offsetX, offsetY);
+                ctx.stroke();
+            };
+
+            const stopDrawing = () => setIsDrawing(false);
+
+            const clearCanvas = () => {
+                const canvas = canvasRef.current;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                onClear();
+            };
+
+            const submitSignature = () => {
+                const signatureImage = canvasRef.current.toDataURL('image/png');
+                onSign(signatureImage);
+            };
+
+            return (
+                <div className="mrn-signature">
+                    <div>Signature of Vendor:</div>
+                    <canvas
+                        ref={canvasRef}
+                        className="signature-canvas"
+                        onMouseDown={startDrawing}
+                        onMouseMove={draw}
+                        onMouseUp={stopDrawing}
+                        onMouseLeave={stopDrawing}
+                    />
+                    <div className="signature-buttons">
+                        <button className="btn btn-primary" onClick={submitSignature}>
+                            Submit Signature
+                        </button>
+                        <button className="btn btn-secondary" onClick={clearCanvas}>
+                            Clear
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        // MRN Component
+        function MRNDisplay({ mrn, onSign }) {
+            const [signatureImage, setSignatureImage] = useState(null);
+            const [showTOC, setShowTOC] = useState(false);
+
+            const handleSign = (image) => {
+                setSignatureImage(image);
+                NotificationManager.add('Signature captured. Click Submit to generate PDF.', 'success', 'Signature Ready');
+            };
+
+            const generateAndDownloadPDF = async () => {
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const margin = 10;
+                let yPosition = margin;
+
+                // Header
+                doc.setFontSize(14);
+                doc.setFont(undefined, 'bold');
+                doc.text('MATERIAL RECEIPT NOTE (MRN)', pageWidth / 2, yPosition, { align: 'center' });
+                yPosition += 15;
+
+                // Vendor Info & Warehouses Grid
+                doc.setFontSize(10);
+                const colWidth = (pageWidth - 2 * margin) / 2;
+
+                // Vendor Section
+                doc.rect(margin, yPosition, colWidth - 5, 50);
+                doc.setFont(undefined, 'bold');
+                doc.text('VENDOR INFORMATION', margin + 5, yPosition + 5);
+                doc.setFont(undefined, 'normal');
+                let vendorY = yPosition + 12;
+                doc.text(`Name: ${mrn.vendorName}`, margin + 5, vendorY);
+                vendorY += 6;
+                doc.text(`Contact: ${mrn.vendorPhone}`, margin + 5, vendorY);
+                vendorY += 6;
+                doc.text(`Email: ${mrn.vendorEmail}`, margin + 5, vendorY);
+                vendorY += 6;
+                doc.text(`PAN: ${mrn.vendorPAN}`, margin + 5, vendorY);
+                vendorY += 6;
+                doc.text(`Address: ${mrn.vendorAddress || 'N/A'}`, margin + 5, vendorY);
+
+                // Warehouses Section
+                doc.rect(margin + colWidth, yPosition, colWidth - 5, 50);
+                doc.setFont(undefined, 'bold');
+                doc.text('WAREHOUSE', margin + colWidth + 5, yPosition + 5);
+                doc.setFont(undefined, 'normal');
+
+                const warehouses = [
+                    { name: 'Delhi', address: 'C-35, Ground floor, Sector-2, Noida, UP-201301' },
+                    { name: 'Mumbai', address: 'Shop no.3, Galleria Market, Sector-28, Kharghar, Navi Mumbai' },
+                    { name: 'Hyderabad', address: '2nd Floor, Above Bata Showroom, Kukatpally' }
+                ];
+
+                let warehouseY = yPosition + 12;
+                warehouses.forEach(wh => {
+                    const isSelected = mrn.selectedWarehouse === wh.name;
+                    doc.text(`${isSelected ? '✓' : '○'} ${wh.name}`, margin + colWidth + 5, warehouseY);
+                    warehouseY += 5;
+                });
+
+                yPosition += 55;
+
+                // Items Table
+                doc.setFont(undefined, 'bold');
+                doc.text('ITEMS DETAILS', margin, yPosition);
+                yPosition += 8;
+
+                const tableHeaders = ['S.NO', 'SKU', 'ITEM DETAILS', 'SIZE(UK)', 'QTY', 'PAYOUT', 'TYPE'];
+                const tableData = [];
+
+                mrn.items.forEach((item, idx) => {
+                    tableData.push([
+                        (idx + 1).toString(),
+                        item.sku,
+                        `${item.brand} ${item.model}`,
+                        item.size,
+                        '1',
+                        `₹${item.payout}`,
+                        item.type === 'cashout' ? 'CASHOUT' : 'CONSIGN'
+                    ]);
+                });
+
+                // Add empty rows
+                while (tableData.length < 10) {
+                    tableData.push(['', '', '', '', '', '', '']);
+                }
+
+                doc.autoTable({
+                    head: [tableHeaders],
+                    body: tableData,
+                    startY: yPosition,
+                    margin: margin,
+                    theme: 'grid',
+                    styles: { fontSize: 8, cellPadding: 3 },
+                    headStyles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], fontStyle: 'bold' },
+                    didDrawPage: function(data) {
+                        yPosition = data.lastAutoTable.finalY + 5;
+                    }
+                });
+
+                yPosition = doc.lastAutoTable.finalY + 5;
+
+                // Total Row
+                doc.setFont(undefined, 'bold');
+                const totalPayout = mrn.items.reduce((sum, item) => sum + parseInt(item.payout || 0), 0);
+                doc.text(`TOTAL PAYOUT: ₹${totalPayout}`, margin, yPosition);
+                yPosition += 12;
+
+                // Signature Section
+                if (signatureImage) {
+                    doc.text('Vendor Signature:', margin, yPosition);
+                    yPosition += 8;
+                    doc.addImage(signatureImage, 'PNG', margin, yPosition, 40, 30);
+                    yPosition += 35;
+                }
+
+                // New Page for T&C
+                doc.addPage();
+                yPosition = margin;
+
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.text('TERMS & CONDITIONS', margin, yPosition);
+                yPosition += 10;
+
+                const clauses = [
+                    ['Authenticity & Ownership', 'Vendor warrants that all products are authentic and legally owned.'],
+                    ['Compliance with Laws', 'All products comply with applicable laws and regulations.'],
+                    ['Return of Unsold Products', 'CDC will return unsold products within agreed timeline.'],
+                    ['Payout & Terms', 'Payment terms are as per mutually agreed schedule.'],
+                    ['Liability', 'CDC is not liable for damage post-receipt at warehouse.'],
+                    ['Indemnity', 'Vendor indemnifies CDC against third-party claims.'],
+                    ['Confidentiality', 'Both parties maintain confidentiality of business information.'],
+                    ['Intellectual Property', 'All IP rights remain with respective owners.'],
+                    ['Dispute Resolution', 'Disputes resolved through arbitration.'],
+                    ['Governing Law', 'Agreement governed by laws of India.']
+                ];
+
+                doc.setFontSize(9);
+                clauses.forEach((clause, idx) => {
+                    if (yPosition > pageHeight - 20) {
+                        doc.addPage();
+                        yPosition = margin;
+                    }
+                    doc.setFont(undefined, 'bold');
+                    doc.text(`${idx + 1}. ${clause[0]}`, margin, yPosition);
+                    yPosition += 5;
+                    doc.setFont(undefined, 'normal');
+                    const lines = doc.splitTextToSize(clause[1], pageWidth - 2 * margin);
+                    doc.text(lines, margin, yPosition);
+                    yPosition += lines.length * 5 + 5;
+                });
+
+                // Try upload to server, fallback to download
+                const pdfBlob = doc.output('blob');
+                const formData = new FormData();
+                formData.append('file', pdfBlob, `MRN_${mrn.mrnNumber}.pdf`);
+                formData.append('mrnNumber', mrn.mrnNumber);
+                formData.append('vendorId', mrn.vendorId);
+
+                try {
+                    const uploadResponse = await fetch('/api/drive/mrn-upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    if (uploadResponse.ok) {
+                        NotificationManager.add('MRN PDF uploaded successfully!', 'success', 'Upload Complete');
+                    } else {
+                        throw new Error('Upload failed');
+                    }
+                } catch (error) {
+                    doc.save(`MRN_${mrn.mrnNumber}.pdf`);
+                    NotificationManager.add('MRN PDF downloaded (server offline)', 'info', 'Download Complete');
+                }
+            };
+
+            return (
+                <div className="mrn-container">
+                    <div className="mrn-header">MATERIAL RECEIPT NOTE</div>
+                    <div className="mrn-header" style={{ fontSize: '12px', marginBottom: '30px' }}>
+                        MRN #: {mrn.mrnNumber}
+                    </div>
+
+                    <div className="mrn-grid">
+                        <div className="mrn-section">
+                            <div className="mrn-label">VENDOR INFORMATION</div>
+                            <div className="mrn-field">
+                                <div>Name:</div>
+                                <div style={{ borderBottom: '1px solid #1a1a1a', paddingBottom: '4px' }}>
+                                    {mrn.vendorName}
+                                </div>
+                            </div>
+                            <div className="mrn-field">
+                                <div>Contact No.:</div>
+                                <div style={{ borderBottom: '1px solid #1a1a1a', paddingBottom: '4px' }}>
+                                    {mrn.vendorPhone}
+                                </div>
+                            </div>
+                            <div className="mrn-field">
+                                <div>Email ID:</div>
+                                <div style={{ borderBottom: '1px solid #1a1a1a', paddingBottom: '4px' }}>
+                                    {mrn.vendorEmail}
+                                </div>
+                            </div>
+                            <div className="mrn-field">
+                                <div>PAN NO.:</div>
+                                <div style={{ borderBottom: '1px solid #1a1a1a', paddingBottom: '4px' }}>
+                                    {mrn.vendorPAN}
+                                </div>
+                            </div>
+                            <div className="mrn-field">
+                                <div>Address:</div>
+                                <div style={{ borderBottom: '1px solid #1a1a1a', paddingBottom: '4px' }}>
+                                    {mrn.vendorAddress || 'Not provided'}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mrn-section">
+                            <div className="mrn-label">SELECT WAREHOUSE</div>
+                            <div className="warehouse-option">
+                                <input
+                                    type="radio"
+                                    name="warehouse"
+                                    checked={mrn.selectedWarehouse === 'Delhi'}
+                                    readOnly
+                                />
+                                <div>
+                                    <div className="warehouse-name">Delhi</div>
+                                    <div style={{ fontSize: '11px' }}>
+                                        C-35, Ground floor, Sector-2, Noida, UP-201301
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="warehouse-option">
+                                <input
+                                    type="radio"
+                                    name="warehouse"
+                                    checked={mrn.selectedWarehouse === 'Mumbai'}
+                                    readOnly
+                                />
+                                <div>
+                                    <div className="warehouse-name">Mumbai</div>
+                                    <div style={{ fontSize: '11px' }}>
+                                        Shop no.3, Galleria Market, Sector-28, Kharghar, Navi Mumbai, Maharashtra-410210
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="warehouse-option">
+                                <input
+                                    type="radio"
+                                    name="warehouse"
+                                    checked={mrn.selectedWarehouse === 'Hyderabad'}
+                                    readOnly
+                                />
+                                <div>
+                                    <div className="warehouse-name">Hyderabad</div>
+                                    <div style={{ fontSize: '11px' }}>
+                                        2nd Floor, Above Bata Showroom, Kukatpally, Hyderabad-500072
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mrn-label" style={{ marginTop: '20px' }}>ITEMS DETAILS</div>
+                    <table className="mrn-table">
+                        <thead>
+                            <tr>
+                                <th>S.NO</th>
+                                <th>SKU</th>
+                                <th>ITEMS DETAILS</th>
+                                <th>SIZE(UK)</th>
+                                <th>QTY</th>
+                                <th>PAYOUT</th>
+                                <th>CONSIGN/CASHOUT</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {mrn.items.map((item, idx) => (
+                                <tr key={idx}>
+                                    <td>{idx + 1}</td>
+                                    <td>{item.sku}</td>
+                                    <td>{item.brand} {item.model}</td>
+                                    <td>{item.size}</td>
+                                    <td>1</td>
+                                    <td>₹{item.payout}</td>
+                                    <td>{item.type === 'cashout' ? 'CASHOUT' : 'CONSIGN'}</td>
+                                </tr>
+                            ))}
+                            {Array.from({ length: Math.max(0, 15 - mrn.items.length) }).map((_, idx) => (
+                                <tr key={`empty-${idx}`}>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                            ))}
+                            <tr className="mrn-total">
+                                <td colSpan="5">TOTAL</td>
+                                <td>₹{mrn.items.reduce((sum, item) => sum + parseInt(item.payout || 0), 0)}</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div className="mrn-footer">
+                        <div>
+                            <div className="mrn-label">DEAL CLOSED WITH (CDC EMPLOYEE)</div>
+                            <div className="mrn-field" style={{ minHeight: '30px' }}>&nbsp;</div>
+                        </div>
+                        <div>
+                            <div className="mrn-label">FOR CDC USE ONLY</div>
+                            <div className="mrn-field" style={{ minHeight: '30px' }}>&nbsp;</div>
+                        </div>
+                    </div>
+
+                    {!signatureImage ? (
+                        <SignatureCanvas
+                            onSign={handleSign}
+                            onClear={() => setSignatureImage(null)}
+                        />
+                    ) : (
+                        <div className="mrn-signature">
+                            <div>Signature of Vendor:</div>
+                            <img
+                                src={signatureImage}
+                                style={{
+                                    border: '1px solid #1a1a1a',
+                                    maxWidth: '150px',
+                                    marginTop: '10px',
+                                    marginBottom: '20px'
+                                }}
+                                alt="Vendor Signature"
+                            />
+                            <div className="signature-buttons">
+                                <button className="btn btn-primary" onClick={generateAndDownloadPDF}>
+                                    Generate & Download PDF
+                                </button>
+                                <button className="btn btn-secondary" onClick={() => setSignatureImage(null)}>
+                                    Draw Again
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    <div style={{ marginTop: '30px', borderTop: '1px solid #1a1a1a', paddingTop: '20px' }}>
+                        <div className="mrn-label">TERMS & CONDITIONS</div>
+                        <button
+                            className="btn btn-secondary"
+                            onClick={() => setShowTOC(!showTOC)}
+                            style={{ marginTop: '10px' }}
+                        >
+                            {showTOC ? 'Hide' : 'Show'} Terms & Conditions
+                        </button>
+
+                        {showTOC && (
+                            <div className="toc-section">
+                                {[
+                                    {
+                                        title: 'Authenticity & Ownership',
+                                        text: 'The vendor warrants that all products submitted are authentic and legally owned by the vendor. CDC will not be liable for any authenticity disputes post-acceptance.'
+                                    },
+                                    {
+                                        title: 'Compliance with Laws',
+                                        text: 'All products must comply with applicable federal, state, and local laws and regulations. Vendor is responsible for ensuring legal compliance.'
+                                    },
+                                    {
+                                        title: 'Return of Unsold Products',
+                                        text: 'CDC will return all unsold products to the vendor within 60 days of request. Vendor must cover return shipping costs.'
+                                    },
+                                    {
+                                        title: 'Payout & Terms',
+                                        text: 'Payment will be processed within 30 days of product sale. Consignment items will be paid upon sale; cashout items paid immediately upon receipt.'
+                                    },
+                                    {
+                                        title: 'Liability Limitations',
+                                        text: 'CDC is not liable for damage, loss, or theft of products after receipt at warehouse. Insurance recommendations available upon request.'
+                                    },
+                                    {
+                                        title: 'Indemnification',
+                                        text: 'Vendor indemnifies CDC against any third-party claims, including trademark or intellectual property claims.'
+                                    },
+                                    {
+                                        title: 'Confidentiality',
+                                        text: 'Both parties maintain strict confidentiality regarding business information, pricing, and customer data shared during partnership.'
+                                    },
+                                    {
+                                        title: 'Intellectual Property Rights',
+                                        text: 'All intellectual property rights remain with their respective owners. CDC may use product images for catalog purposes only.'
+                                    },
+                                    {
+                                        title: 'Dispute Resolution',
+                                        text: 'Disputes will be resolved through mediation and binding arbitration under Indian Arbitration and Conciliation Act, 1996.'
+                                    },
+                                    {
+                                        title: 'Governing Law',
+                                        text: 'This agreement is governed by and construed in accordance with the laws of India, without regard to conflicts of law.'
+                                    }
+                                ].map((clause, idx) => (
+                                    <div key={idx} className="toc-clause">
+                                        <span className="toc-clause-number">{idx + 1}. {clause.title}</span>
+                                        <p style={{ marginTop: '8px', marginBottom: '16px', color: '#666' }}>
+                                            {clause.text}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Main App Component
+        function App() {
+            const [appState, setAppState] = useState('landing'); // landing, register, login, dashboard
+            const [session, setSession] = useState(null);
+            const [shoes, setShoes] = useState([]);
+            const [mrns, setMRNs] = useState([]);
+            const [notifications, setNotifications] = useState([]);
+            const [activeTab, setActiveTab] = useState('submit');
+            const [message, setMessage] = useState({ type: '', text: '' });
+
+            // Check session on load
+            useEffect(() => {
+                const savedSession = localStorage.getItem('cdc_vendor_session');
+                if (savedSession) {
+                    const sessionData = JSON.parse(savedSession);
+                    setSession(sessionData);
+                    setAppState('dashboard');
+                    loadVendorData(sessionData.id);
+                }
+            }, []);
+
+            // Real-time sync
+            useEffect(() => {
+                const handleStorageChange = () => {
+                    if (appState === 'dashboard') {
+                        loadVendorData(session?.id);
+                    }
+                };
+
+                window.addEventListener('storage', handleStorageChange);
+                window.addEventListener('storagechange', handleStorageChange);
+
+                const pollInterval = setInterval(handleStorageChange, 5000);
+
+                return () => {
+                    window.removeEventListener('storage', handleStorageChange);
+                    window.removeEventListener('storagechange', handleStorageChange);
+                    clearInterval(pollInterval);
+                };
+            }, [appState, session?.id]);
+
+            const loadVendorData = (vendorId) => {
+                // Load shoes
+                const vendorShoes = JSON.parse(localStorage.getItem(`cdc_vendor_shoes_${vendorId}`) || '[]');
+                setShoes(vendorShoes);
+
+                // Load MRNs
+                const vendorMRNs = JSON.parse(localStorage.getItem(`cdc_vendor_mrns_${vendorId}`) || '[]');
+                setMRNs(vendorMRNs);
+
+                // Load notifications
+                const vendorNotifications = NotificationManager.getAll();
+                setNotifications(vendorNotifications);
+            };
+
+            const showMessage = (text, type = 'success') => {
+                setMessage({ type, text });
+                setTimeout(() => setMessage({ type: '', text: '' }), 4000);
+            };
+
+            // Register
+            const handleRegister = async (formData) => {
+                const vendors = JSON.parse(localStorage.getItem('cdc_registered_vendors') || '[]');
+
+                if (vendors.some(v => v.email === formData.email)) {
+                    showMessage('Email already registered', 'error');
+                    return;
+                }
+
+                const newVendor = {
+                    id: `v-${Date.now()}`,
+                    name: formData.businessName,
+                    contactPerson: formData.contactPerson,
+                    email: formData.email,
+                    phone: formData.phone,
+                    password: formData.password,
+                    gst: formData.gst,
+                    pan: formData.pan,
+                    registeredAt: new Date().toISOString()
+                };
+
+                vendors.push(newVendor);
+                localStorage.setItem('cdc_registered_vendors', JSON.stringify(vendors));
+
+                setSession(newVendor);
+                localStorage.setItem('cdc_vendor_session', JSON.stringify(newVendor));
+                setAppState('dashboard');
+                loadVendorData(newVendor.id);
+                showMessage('Registration successful! Welcome to CDC.', 'success');
+                NotificationManager.add('Welcome to Crep Dog Crew!', 'success', 'Registration Complete');
+            };
+
+            // Login
+            const handleLogin = async (email, password) => {
+                const vendors = JSON.parse(localStorage.getItem('cdc_registered_vendors') || '[]');
+                const demoVendor = {
+                    id: 'v-demo-001',
+                    name: 'Rahul Sneaker Co.',
+                    email: 'rahul@sneakers.in',
+                    password: 'demo1234',
+                    gst: '27AABCU9603R1ZM',
+                    pan: 'AABCU9603R'
+                };
+
+                let vendor = vendors.find(v => v.email === email && v.password === password);
+                if (!vendor) {
+                    vendor = demoVendor.email === email && demoVendor.password === password ? demoVendor : null;
+                }
+
+                if (!vendor) {
+                    showMessage('Invalid email or password', 'error');
+                    return;
+                }
+
+                setSession(vendor);
+                localStorage.setItem('cdc_vendor_session', JSON.stringify(vendor));
+                setAppState('dashboard');
+                loadVendorData(vendor.id);
+                showMessage('Login successful!', 'success');
+                NotificationManager.add(`Welcome back, ${vendor.name}!`, 'success', 'Login');
+            };
+
+            // Logout
+            const handleLogout = () => {
+                localStorage.removeItem('cdc_vendor_session');
+                setSession(null);
+                setAppState('landing');
+                setShoes([]);
+                setMRNs([]);
+                showMessage('Logged out successfully', 'success');
+            };
+
+            // Add shoe
+            const addShoe = (shoeData) => {
+                const newShoes = [...shoes, { ...shoeData, id: Date.now(), status: 'submitted' }];
+                setShoes(newShoes);
+                localStorage.setItem(`cdc_vendor_shoes_${session.id}`, JSON.stringify(newShoes));
+                showMessage('Shoe added to batch!', 'success');
+            };
+
+            // Remove shoe
+            const removeShoe = (shoeId) => {
+                const newShoes = shoes.filter(s => s.id !== shoeId);
+                setShoes(newShoes);
+                localStorage.setItem(`cdc_vendor_shoes_${session.id}`, JSON.stringify(newShoes));
+                showMessage('Shoe removed from batch', 'success');
+            };
+
+            // Submit batch
+            const submitBatch = () => {
+                if (shoes.length === 0) {
+                    showMessage('Add at least one shoe to submit', 'error');
+                    return;
+                }
+
+                const batchId = `BATCH-${Date.now()}`;
+                const submittedShoes = shoes.map(s => ({ ...s, status: 'submitted' }));
+                setShoes(submittedShoes);
+                localStorage.setItem(`cdc_vendor_shoes_${session.id}`, JSON.stringify(submittedShoes));
+                showMessage(`Batch ${batchId} submitted successfully!`, 'success');
+                NotificationManager.add(`Your batch ${batchId} with ${shoes.length} items has been submitted for review.`, 'success', 'Batch Submitted');
+            };
+
+            // Handle Excel upload
+            const handleExcelUpload = (file) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const rows = XLSX.utils.sheet_to_json(sheet);
+
+                        rows.forEach(row => {
+                            if (row.brand && row.model) {
+                                addShoe({
+                                    brand: row.brand,
+                                    model: row.model,
+                                    sku: row.sku || '',
+                                    size: row.size || 'UK 6',
+                                    condition: row.condition || 'New',
+                                    payout: row.payout || '0',
+                                    type: row.type === 'consignment' ? 'consignment' : 'cashout'
+                                });
+                            }
+                        });
+
+                        showMessage(`Uploaded ${rows.length} shoes from Excel`, 'success');
+                    } catch (error) {
+                        showMessage('Error processing Excel file', 'error');
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            };
+
+            if (appState === 'landing') {
+                return <LandingPage onLogin={() => setAppState('login')} onRegister={() => setAppState('register')} />;
+            }
+
+            if (appState === 'register') {
+                return <RegisterForm onSubmit={handleRegister} onBack={() => setAppState('landing')} />;
+            }
+
+            if (appState === 'login') {
+                return <LoginForm onSubmit={handleLogin} onBack={() => setAppState('landing')} />;
+            }
+
+            if (appState === 'dashboard' && session) {
+                return (
+                    <Dashboard
+                        session={session}
+                        onLogout={handleLogout}
+                        shoes={shoes}
+                        mrns={mrns}
+                        notifications={notifications}
+                        onAddShoe={addShoe}
+                        onRemoveShoe={removeShoe}
+                        onSubmitBatch={submitBatch}
+                        onExcelUpload={handleExcelUpload}
+                        message={message}
+                        showMessage={showMessage}
+                    />
+                );
+            }
+
+            return null;
+        }
+
+        // Landing Page
+        function LandingPage({ onLogin, onRegister }) {
+            return (
+                <div className="landing">
+                    <div className="landing-content">
+                        <div className="landing-logo">CDC</div>
+                        <h1 className="landing-title">CREP DOG CREW</h1>
+                        <p className="landing-subtitle">Premium Sneaker Vendor Partnership Portal</p>
+                        <div className="button-group">
+                            <button className="btn btn-primary" onClick={onLogin}>
+                                Vendor Login
+                            </button>
+                            <button className="btn btn-secondary" onClick={onRegister}>
+                                Register as Vendor
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Register Form
+        function RegisterForm({ onSubmit, onBack }) {
+            const [formData, setFormData] = useState({
+                businessName: '',
+                contactPerson: '',
+                email: '',
+                phone: '',
+                password: '',
+                gst: '',
+                pan: ''
+            });
+
+            const handleChange = (e) => {
+                setFormData({ ...formData, [e.target.name]: e.target.value });
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (!formData.businessName || !formData.email || !formData.password) {
+                    alert('Please fill all required fields');
+                    return;
+                }
+                onSubmit(formData);
+            };
+
+            return (
+                <div className="main">
+                    <div className="container">
+                        <form className="form-container" onSubmit={handleSubmit}>
+                            <h2 className="form-title">Register as Vendor</h2>
+
+                            <div className="form-group">
+                                <label className="form-label">Business Name *</label>
+                                <input
+                                    type="text"
+                                    name="businessName"
+                                    className="form-input"
+                                    value={formData.businessName}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Contact Person</label>
+                                <input
+                                    type="text"
+                                    name="contactPerson"
+                                    className="form-input"
+                                    value={formData.contactPerson}
+                                    onChange={handleChange}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Email *</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    className="form-input"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Phone</label>
+                                <input
+                                    type="tel"
+                                    name="phone"
+                                    className="form-input"
+                                    value={formData.phone}
+                                    onChange={handleChange}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Password *</label>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    className="form-input"
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">GST Number</label>
+                                <input
+                                    type="text"
+                                    name="gst"
+                                    className="form-input"
+                                    value={formData.gst}
+                                    onChange={handleChange}
+                                    placeholder="27AABCU9603R1ZM"
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">PAN Number</label>
+                                <input
+                                    type="text"
+                                    name="pan"
+                                    className="form-input"
+                                    value={formData.pan}
+                                    onChange={handleChange}
+                                    placeholder="AABCU9603R"
+                                />
+                            </div>
+
+                            <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
+                                Create Account
+                            </button>
+
+                            <div className="form-back">
+                                <button type="button" onClick={onBack}>
+                                    Back to Login
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        }
+
+        // Login Form
+        function LoginForm({ onSubmit, onBack }) {
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                onSubmit(email, password);
+            };
+
+            return (
+                <div className="main">
+                    <div className="container">
+                        <form className="form-container" onSubmit={handleSubmit}>
+                            <h2 className="form-title">Vendor Login</h2>
+
+                            <div className="form-group">
+                                <label className="form-label">Email</label>
+                                <input
+                                    type="email"
+                                    className="form-input"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Password</label>
+                                <input
+                                    type="password"
+                                    className="form-input"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
+                            </div>
+
+                            <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
+                                Login
+                            </button>
+
+                            <div className="form-back">
+                                <button type="button" onClick={onBack}>
+                                    Back
+                                </button>
+                            </div>
+
+                            <div style={{ marginTop: '20px', padding: '16px', background: '#f0f0f0', borderRadius: '6px', fontSize: '12px' }}>
+                                <strong>Demo Account:</strong><br />
+                                Email: rahul@sneakers.in<br />
+                                Password: demo1234
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        }
+
+        // Dashboard
+        function Dashboard({
+            session,
+            onLogout,
+            shoes,
+            mrns,
+            notifications,
+            onAddShoe,
+            onRemoveShoe,
+            onSubmitBatch,
+            onExcelUpload,
+            message,
+            showMessage
+        }) {
+            const [activeTab, setActiveTab] = useState('submit');
+            const [newShoe, setNewShoe] = useState({
+                brand: '',
+                model: '',
+                sku: '',
+                size: 'UK 6',
+                condition: 'New',
+                payout: '',
+                type: 'cashout'
+            });
+
+            const handleAddShoe = (e) => {
+                e.preventDefault();
+                if (!newShoe.brand || !newShoe.model || !newShoe.payout) {
+                    showMessage('Please fill brand, model, and payout', 'error');
+                    return;
+                }
+                onAddShoe(newShoe);
+                setNewShoe({
+                    brand: '',
+                    model: '',
+                    sku: '',
+                    size: 'UK 6',
+                    condition: 'New',
+                    payout: '',
+                    type: 'cashout'
+                });
+            };
+
+            const handleFileUpload = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    onExcelUpload(file);
+                }
+            };
+
+            const createDemoMRN = () => {
+                const mrnData = {
+                    mrnNumber: `MRN-${Date.now()}`,
+                    vendorId: session.id,
+                    vendorName: session.name,
+                    vendorEmail: session.email,
+                    vendorPhone: session.phone || '+91-9999-999-999',
+                    vendorPAN: session.pan,
+                    vendorAddress: 'To be updated',
+                    selectedWarehouse: 'Delhi',
+                    items: shoes.slice(0, 5),
+                    createdAt: new Date().toISOString()
+                };
+
+                const allMRNs = [mrnData, ...mrns];
+                localStorage.setItem(`cdc_vendor_mrns_${session.id}`, JSON.stringify(allMRNs));
+                window.dispatchEvent(new Event('storagechange'));
+                showMessage('Demo MRN created! You can now sign and download it.', 'success');
+            };
+
+            return (
+                <div>
+                    {/* Header */}
+                    <div className="header">
+                        <div className="header-content">
+                            <div className="logo">CDC</div>
+                            <div className="header-actions">
+                                <div className="vendor-info">
+                                    <div className="vendor-name">{session.name}</div>
+                                    <div style={{ fontSize: '12px', color: '#999' }}>{session.email}</div>
+                                </div>
+                                <button className="logout-btn" onClick={onLogout}>
+                                    Logout
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="main">
+                        <div className="container">
+                            {message.text && (
+                                <div className={message.type === 'error' ? 'error' : 'success'}>
+                                    {message.text}
+                                </div>
+                            )}
+
+                            <div className="dashboard">
+                                {/* Tabs */}
+                                <div className="tabs">
+                                    <button
+                                        className={`tab ${activeTab === 'submit' ? 'active' : ''}`}
+                                        onClick={() => setActiveTab('submit')}
+                                    >
+                                        Submit Shoes
+                                    </button>
+                                    <button
+                                        className={`tab ${activeTab === 'myshoes' ? 'active' : ''}`}
+                                        onClick={() => setActiveTab('myshoes')}
+                                    >
+                                        My Shoes
+                                    </button>
+                                    <button
+                                        className={`tab ${activeTab === 'mrn' ? 'active' : ''}`}
+                                        onClick={() => setActiveTab('mrn')}
+                                    >
+                                        MRN
+                                    </button>
+                                    <button
+                                        className={`tab ${activeTab === 'notifications' ? 'active' : ''}`}
+                                        onClick={() => setActiveTab('notifications')}
+                                    >
+                                        Notifications ({notifications.length})
+                                    </button>
+                                </div>
+
+                                {/* Tab Content */}
+                                <div className="tab-content">
+                                    {/* Submit Shoes Tab */}
+                                    {activeTab === 'submit' && (
+                                        <div>
+                                            <h3 style={{ marginBottom: '20px' }}>Add Shoes to Batch</h3>
+
+                                            <form className="shoe-form" onSubmit={handleAddShoe}>
+                                                <div className="form-grid">
+                                                    <div className="form-group">
+                                                        <label className="form-label">Brand *</label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-input"
+                                                            value={newShoe.brand}
+                                                            onChange={(e) => setNewShoe({ ...newShoe, brand: e.target.value })}
+                                                            placeholder="Nike, Adidas, etc."
+                                                        />
+                                                    </div>
+
+                                                    <div className="form-group">
+                                                        <label className="form-label">Model *</label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-input"
+                                                            value={newShoe.model}
+                                                            onChange={(e) => setNewShoe({ ...newShoe, model: e.target.value })}
+                                                            placeholder="Air Jordan 1, Ultraboost, etc."
+                                                        />
+                                                    </div>
+
+                                                    <div className="form-group">
+                                                        <label className="form-label">SKU</label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-input"
+                                                            value={newShoe.sku}
+                                                            onChange={(e) => setNewShoe({ ...newShoe, sku: e.target.value })}
+                                                            placeholder="SKU"
+                                                        />
+                                                    </div>
+
+                                                    <div className="form-group">
+                                                        <label className="form-label">Size (UK)</label>
+                                                        <select
+                                                            className="form-select"
+                                                            value={newShoe.size}
+                                                            onChange={(e) => setNewShoe({ ...newShoe, size: e.target.value })}
+                                                        >
+                                                            {[4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map(size => (
+                                                                <option key={size} value={`UK ${size}`}>UK {size}</option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+
+                                                    <div className="form-group">
+                                                        <label className="form-label">Condition</label>
+                                                        <select
+                                                            className="form-select"
+                                                            value={newShoe.condition}
+                                                            onChange={(e) => setNewShoe({ ...newShoe, condition: e.target.value })}
+                                                        >
+                                                            <option>New</option>
+                                                            <option>Like New</option>
+                                                            <option>Good</option>
+                                                            <option>Fair</option>
+                                                        </select>
+                                                    </div>
+
+                                                    <div className="form-group">
+                                                        <label className="form-label">Payout Value (₹) *</label>
+                                                        <input
+                                                            type="number"
+                                                            className="form-input"
+                                                            value={newShoe.payout}
+                                                            onChange={(e) => setNewShoe({ ...newShoe, payout: e.target.value })}
+                                                            placeholder="5000"
+                                                        />
+                                                    </div>
+
+                                                    <div className="form-group">
+                                                        <label className="form-label">Type</label>
+                                                        <select
+                                                            className="form-select"
+                                                            value={newShoe.type}
+                                                            onChange={(e) => setNewShoe({ ...newShoe, type: e.target.value })}
+                                                        >
+                                                            <option value="cashout">Cashout</option>
+                                                            <option value="consignment">Consignment</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <button type="submit" className="btn btn-primary">
+                                                    Add to Batch
+                                                </button>
+                                            </form>
+
+                                            <div style={{ marginTop: '30px' }}>
+                                                <label className="form-label" style={{ marginBottom: '12px', display: 'block' }}>
+                                                    Or Bulk Upload via Excel/CSV:
+                                                </label>
+                                                <div className="upload-area">
+                                                    <input
+                                                        type="file"
+                                                        accept=".xlsx,.xls,.csv"
+                                                        onChange={handleFileUpload}
+                                                        style={{ display: 'none' }}
+                                                        id="file-upload"
+                                                    />
+                                                    <label htmlFor="file-upload" style={{ cursor: 'pointer', width: '100%' }}>
+                                                        <div className="upload-icon">📁</div>
+                                                        <div className="upload-text">Click to upload or drag and drop</div>
+                                                        <div className="upload-hint">Excel (XLSX) or CSV with columns: brand, model, sku, size, condition, payout, type</div>
+                                                    </label>
+                                                </div>
+                                            </div>
+
+                                            {shoes.length > 0 && (
+                                                <div className="shoe-list">
+                                                    <h4 style={{ marginBottom: '16px' }}>
+                                                        Batch ({shoes.length} items)
+                                                    </h4>
+                                                    {shoes.map(shoe => (
+                                                        <div key={shoe.id} className="shoe-item">
+                                                            <div className="shoe-details">
+                                                                <div className="shoe-model">
+                                                                    {shoe.brand} {shoe.model}
+                                                                </div>
+                                                                <div className="shoe-meta">
+                                                                    SKU: {shoe.sku} | Size: {shoe.size} | Condition: {shoe.condition}
+                                                                </div>
+                                                            </div>
+                                                            <div className="shoe-value">₹{shoe.payout}</div>
+                                                            <button
+                                                                className="remove-btn"
+                                                                onClick={() => onRemoveShoe(shoe.id)}
+                                                            >
+                                                                Remove
+                                                            </button>
+                                                        </div>
+                                                    ))}
+
+                                                    <div style={{ marginTop: '20px' }}>
+                                                        <button
+                                                            className="btn btn-primary"
+                                                            onClick={onSubmitBatch}
+                                                        >
+                                                            Submit Batch for Review
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* My Shoes Tab */}
+                                    {activeTab === 'myshoes' && (
+                                        <div>
+                                            <h3 style={{ marginBottom: '20px' }}>My Shoes ({shoes.length})</h3>
+
+                                            {shoes.length === 0 ? (
+                                                <div className="text-center text-muted">
+                                                    <p>No shoes submitted yet. Start by adding shoes in the "Submit Shoes" tab.</p>
+                                                </div>
+                                            ) : (
+                                                <div className="table-wrapper">
+                                                    <table>
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Brand</th>
+                                                                <th>Model</th>
+                                                                <th>SKU</th>
+                                                                <th>Size</th>
+                                                                <th>Condition</th>
+                                                                <th>Payout (₹)</th>
+                                                                <th>Type</th>
+                                                                <th>Status</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {shoes.map(shoe => (
+                                                                <tr key={shoe.id}>
+                                                                    <td>{shoe.brand}</td>
+                                                                    <td>{shoe.model}</td>
+                                                                    <td>{shoe.sku}</td>
+                                                                    <td>{shoe.size}</td>
+                                                                    <td>{shoe.condition}</td>
+                                                                    <td>₹{shoe.payout}</td>
+                                                                    <td style={{ textTransform: 'capitalize' }}>
+                                                                        {shoe.type}
+                                                                    </td>
+                                                                    <td>
+                                                                        <span className={`badge badge-${shoe.status}`}>
+                                                                            {shoe.status}
+                                                                        </span>
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* MRN Tab */}
+                                    {activeTab === 'mrn' && (
+                                        <div>
+                                            <h3 style={{ marginBottom: '20px' }}>Material Receipt Notes</h3>
+
+                                            {mrns.length === 0 ? (
+                                                <div style={{ textAlign: 'center', padding: '40px' }}>
+                                                    <p style={{ color: '#666', marginBottom: '20px' }}>
+                                                        No MRNs yet. Create a demo MRN to test the functionality.
+                                                    </p>
+                                                    <button
+                                                        className="btn btn-primary"
+                                                        onClick={createDemoMRN}
+                                                        disabled={shoes.length === 0}
+                                                    >
+                                                        {shoes.length === 0 ? 'Add shoes first' : 'Create Demo MRN'}
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                mrns.map((mrn, idx) => (
+                                                    <div key={idx} style={{ marginBottom: '40px' }}>
+                                                        <MRNDisplay mrn={mrn} />
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Notifications Tab */}
+                                    {activeTab === 'notifications' && (
+                                        <div>
+                                            <h3 style={{ marginBottom: '20px' }}>Notifications ({notifications.length})</h3>
+
+                                            {notifications.length === 0 ? (
+                                                <div className="text-center text-muted">
+                                                    <p>No notifications yet.</p>
+                                                </div>
+                                            ) : (
+                                                <div className="notifications-list">
+                                                    {notifications.map(notif => (
+                                                        <div key={notif.id} className="notification-item">
+                                                            <div className="notification-title">{notif.title}</div>
+                                                            <div className="notification-message">{notif.message}</div>
+                                                            <div className="notification-time">
+                                                                {new Date(notif.timestamp).toLocaleString()}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Render App
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
